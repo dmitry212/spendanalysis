@@ -1,22 +1,28 @@
-select Date, length(Date), 
-case 
-when length(Date) < 10 then
-substr(Date,6) || '-' || substr(Date,3,2) || '-0' || substr(Date,1,1)
-else
-substr(Date,7) || '-' || substr(Date,4,2) || '-' || substr(Date,1,2)
-end
-from transactions
-
-select min(length(Date)) from transactions
-
+--set propoer dt format in trans_dt
 update transactions set trans_dt =
 case 
 when length(Date) < 10 then
 substr(Date,6) || '-' || substr(Date,3,2) || '-0' || substr(Date,1,1)
 else
 substr(Date,7) || '-' || substr(Date,4,2) || '-' || substr(Date,1,2)
-end 
+end; 
 
-commit
+commit;
 
-select * from transactions when Amount = 
+--filter to '17 and beyond
+delete from transactions where trans_dt < '2017-01-01';
+commit;
+--food labels
+select * from transactions where Category = 'Fast Food'
+update transactions set label = 'FOOD' where Category = 'Fast Food'
+commit;
+select distinct(OriginalDescription) from transactions where Category like lower('%food%')
+and Category not like lower('%ps%9%') and Category not like lower('pet%') order by 1
+update transactions set label = 'FOOD' where Category like lower('%food%')
+and Category not like lower('%ps%9%') and Category not like lower('pet%');
+commit;
+--income
+update transactions set label = 'INCOME' where Category = 'Paycheck';
+
+
+select * from transactions where label is '' order by 4;
