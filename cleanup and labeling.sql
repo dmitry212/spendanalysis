@@ -7,6 +7,19 @@ else
 substr(Date,7) || '-' || substr(Date,1,2) || '-' || substr(Date,4,2)
 end; 
 
+select * from transactions where OriginalDescription like 'Payment%' AND OriginalDescription not like '%PAYPAL%' AND LABEL = '' order by 5 desc;
+
+UPDATE transactions set label = 'IGNORE' WHERE OriginalDescription like 'Payment%' AND 
+OriginalDescription not like '%PAYPAL%' AND LABEL = '';
+
+
+SELECT * FROM transactions WHERE ACCOUNTNAME = 'NATASHA CHECKING' AND CATEGORY = 'Credit Card Payment'
+AND originalDescription not like 'Gap%';
+
+update transactions set label = 'IGNORE' where ACCOUNTNAME = 'NATASHA CHECKING' AND CATEGORY = 'Credit Card Payment'
+AND originalDescription not like 'Gap%';
+
+
 update transactions set AccountName = upper(AccountName); --set upper
 delete from transactions where amount < 1; --remove small stuff
 
