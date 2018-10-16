@@ -2,15 +2,32 @@
 update transactions set trans_dt =
 case 
 when length(Date) < 10 then
-substr(Date,6) || '-' || substr(Date,3,2) || '-0' || substr(Date,1,1)
+substr(Date,6) || '-0' || substr(Date,1,1) || '-' || substr(Date,3,2)
 else
-substr(Date,7) || '-' || substr(Date,4,2) || '-' || substr(Date,1,2)
+substr(Date,7) || '-' || substr(Date,1,2) || '-' || substr(Date,4,2)
 end; 
+
+update transactions set AccountName = upper(AccountName); --set upper
+delete from transactions where amount < 1; --remove small stuff
+
+update transactions_v2 set key = trans_dt || OriginalDescription || Amount;
+
+update transactions set AccountName = 
+(select transactions_v2.AccountName from transactions_v2
+	where transactions_v2.key = transactions.key);
+
+
+transactions_v2.AccountName 
+from transactions join transactions_v2 on transactions.key = transactions_v2.key;
+
+select * from transactions;
 
 commit;
 
 --filter to '17 and beyond
 delete from transactions where trans_dt < '2017-01-01';
+
+
 commit;
 --food labels
 select * from transactions where Category = 'Fast Food'
