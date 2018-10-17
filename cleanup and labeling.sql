@@ -9,9 +9,44 @@ end;
 
 select * from transactions where OriginalDescription like 'Payment%' AND OriginalDescription not like '%PAYPAL%' AND LABEL = '' order by 5 desc;
 
+select * from transactions where category = 'Transfer' and description IN  ('Venmo','Inst Xfer') and label != 'IGNORE' AND AMOUNT > 150 AND TRANS_DT > '2018-02-01' ORDER BY 1; 
+UPDATE transactions SET LABEL = 'IGNORE' where category = 'Transfer' and description NOT IN  ('Venmo','Inst Xfer') and label != 'IGNORE';
+
+UPDATE transactions SET LABEL = 'BALEN' WHERE category = 'Transfer' and description IN  ('Venmo','Inst Xfer') and label != 'IGNORE' 
+AND AMOUNT > 150 
+AND TRANS_DT > '2018-02-01' 
+AND ACCOUNTNAME = 'SHARED CHECKING';
+
 UPDATE transactions set label = 'IGNORE' WHERE OriginalDescription like 'Payment%' AND 
 OriginalDescription not like '%PAYPAL%' AND LABEL = '';
 
+SELECT SUM(AMOUNT) FROM transactions WHERE LABEL = '' ORDER BY AMOUNT desc;
+
+select SUBSTR(TRANS_DT,6,2) || '/' || SUBSTR(TRANS_DT,3,2) as 'mm/yy',  label, sum(-1 * amount) AS 'TOTAL' from transactions WHERE LABEL NOT IN  ('IGNORE','INCOME') 
+group by SUBSTR(TRANS_DT,6,2) || '/' || SUBSTR(TRANS_DT,3,2), label 
+--order by 1,2 desc 
+UNION
+select SUBSTR(TRANS_DT,6,2) || '/' || SUBSTR(TRANS_DT,3,2) as 'mm/yy',  label, sum(amount) from transactions WHERE LABEL != 'IGNORE'  AND LABEL = 'INCOME'
+group by SUBSTR(TRANS_DT,6,2) || '/' || SUBSTR(TRANS_DT,3,2), label
+order by 1,2 desc ;
+
+select SUBSTR(TRANS_DT,6,2) || '/' || SUBSTR(TRANS_DT,3,2) as 'mm/yy', sum(-1 * amount) AS 'TOTAL' from transactions WHERE LABEL NOT IN  ('IGNORE','INCOME') 
+group by SUBSTR(TRANS_DT,6,2) || '/' || SUBSTR(TRANS_DT,3,2) 
+--order by 1,2 desc 
+UNION
+select SUBSTR(TRANS_DT,6,2) || '/' || SUBSTR(TRANS_DT,3,2) as 'mm/yy', sum(amount) from transactions WHERE LABEL != 'IGNORE'  AND LABEL = 'INCOME'
+group by SUBSTR(TRANS_DT,6,2) || '/' || SUBSTR(TRANS_DT,3,2)
+order by 1,2 desc ;
+
+update 
+--CASH
+UPDATE transactions set LABEL = 'LIFESTYLE' WHERE UPPER(DESCRIPTION) LIKE '%AMAZON%' AND LABEL = '';-- ORDER BY 5 desc;
+
+UPDATE transactions set LABEL = 'FOOD' WHERE UPPER(CATEGORY) LIKE '%COFFEE%' AND LABEL = '';-- ORDER BY 5 desc;
+UPDATE transactions SET LABEL = 'CASH' WHERE upper(DESCRIPTION) LIKE 'CASH%ATM%';
+UPDATE transactions SET LABEL = 'IGNORE' WHERE ORIGINALDESCRIPTION LIKE 'Preauthorized Deposit from BANK';
+
+UPDATE transactions set label = 'IGNORE' WHERE ACCOUNTNAME= 'DMITRY CC' AND DESCRIPTION LIKE 'Capital%';
 
 SELECT * FROM transactions WHERE ACCOUNTNAME = 'NATASHA CHECKING' AND CATEGORY = 'Credit Card Payment'
 AND originalDescription not like 'Gap%';
